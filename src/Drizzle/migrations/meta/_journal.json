@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1748493796596,
+      "tag": "0000_minor_azazel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1748973756062,
+      "tag": "0001_sweet_mandrill",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749043813257,
+      "tag": "0002_blue_puck",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749054304186,
+      "tag": "0003_right_jackal",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749128222801,
+      "tag": "0004_big_psylocke",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1749128375327,
+      "tag": "0005_chief_hellfire_club",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1749128544426,
+      "tag": "0006_orange_daimon_hellstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1749139476396,
+      "tag": "0007_slimy_midnight",
+      "breakpoints": true
+    }
+  ]
+}
