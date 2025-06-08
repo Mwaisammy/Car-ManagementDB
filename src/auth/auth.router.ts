@@ -1,15 +1,36 @@
-import { createCustomerController, deleteCustomerController, getAllCustomersController, getCustomerByIdController, loginCustomerController, updateCustomerController } from "./auth.controller"
+import { adminRoleAuth, bothRoleAuth } from "../middleware/bearAuth"
+import { createUserController,loginUserController, verifyUserController } from "./auth.controller"
 import { Express } from "express"
 
 
 
-const customer = (app: Express) => {
+const authentication = (app: Express) => {
     app.route("/auth/register").post(
+        adminRoleAuth,
+
+      
 
         async(req, res, next) => {
             try {
 
-                await createCustomerController(req, res)
+                await createUserController(req, res)
+                
+            } catch (error) {
+                next(error)
+                
+            }
+        }
+    )
+
+    //verify user route
+
+    app.route("/auth/verify").post(
+
+        bothRoleAuth,
+        async(req, res, next) => {
+            try {
+                await verifyUserController(req, res)
+
                 
             } catch (error) {
                 next(error)
@@ -21,9 +42,11 @@ const customer = (app: Express) => {
     //Login route
 
     app.route("/auth/login").post(
+
+        bothRoleAuth,
         async(req, res, next) => {
             try {
-                await loginCustomerController(req, res)
+                await loginUserController(req, res)
                 
             } catch (error:any) {
                 next()
@@ -33,62 +56,8 @@ const customer = (app: Express) => {
      
 
 
-//Get all customers
-    app.route("/customers").get(
-    
-        async (req, res, next) => {
-          try {
-            await getAllCustomersController(req, res);
-          } catch (error: any) {
-            next(error);
-          }
-        }
-      );
-
-      // Get customer by ID
-    
-      app.route("/customer/:id").get(
-      
-          async (req, res, next) => {
-            try {
-              await getCustomerByIdController(req, res);
-            } catch (error: any) {
-              next(error);
-            }
-          }
-        );
-
-
-        //Update customer by ID
-    
-      app.route("/customer/:id").put(
-      
-        async (req, res, next) => {
-          try {
-            await updateCustomerController(req, res);
-          } catch (error: any) {
-            next(error);
-          }
-        }
-      );
-    
-
-      //Delete customer by id
-      
-      app.route("/customer/:id").delete(
-    
-        async (req, res, next) => {
-          try {
-            await deleteCustomerController(req, res);
-          } catch (error: any) {
-            next(error);
-          }
-        }
-      );
-    
-    
-}
+  }
 
 
 
-export default customer
+export default authentication;

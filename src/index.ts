@@ -6,7 +6,9 @@ import payment from './payment/payment.router'
 import booking from './booking/booking.router'
 import location from './location/location.router'
 import reservation from './reservation/reservation.router'
-import customer from './auth/auth.router'
+import { customer } from './customer/customer.router'
+import authentication from './auth/auth.router'
+import joins from './joins/joins.router'
 
 const app = express()
 //Middleware
@@ -23,7 +25,8 @@ payment(app)
 booking(app)
 reservation(app)
 customer(app)
-
+authentication(app)
+joins(app)
 
 
 app.get('/', (req, res) => {

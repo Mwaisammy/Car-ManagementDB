@@ -51,7 +51,7 @@ const car = (app: Express) => {
 
     app.route("/car/:id").put(
 
-        adminRoleAuth,
+        adminRoleAuth, 
         async (req, res, next) => {
             try {
 

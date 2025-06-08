@@ -1,4 +1,5 @@
-import { db } from "@/db";
+// import { db, eq } from "";
+import db from "./db";
 import { BookingsTable, CustomerTable, CarTable } from "./schema";
 
 export const getAllBookingsWithDetails = async () => {

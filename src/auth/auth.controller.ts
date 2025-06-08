@@ -1,49 +1,46 @@
 import bcrypt from 'bcryptjs';
-import { createCustomerService, customerLoginService, deleteCustomerService, getCustomerByIdService, getCustomerService, updateCustomerService } from './auth.service';
 import { Request, Response } from 'express';
 import "dotenv/config";
 import jwt from 'jsonwebtoken';
 import { sendMail } from '../mailer/mailer';
+import { createUserService, getUserByEmailService, userLoginService, verifyUserService } from './auth.service';
 
-export const createCustomerController = async (req: Request, res: Response) => { 
+export const createUserController = async (req: Request, res: Response) => { 
     try {
 
-      const customer = req.body;
-      const password = customer.password;
+      const user = req.body;
+      const password = user.password;
       const hashedPassword = bcrypt.hashSync(password, 10);
-      customer.password = hashedPassword;
+      user.password = hashedPassword;
 
         // Generate a verification code
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-        customer.verificationCode = verificationCode;
-        customer.isVerified = false; // Set isVerified to false by default
+        user.verificationCode = verificationCode;
+        user.isVerified = false; // Set isVerified to false by default
         
 
       
 
-        const createUser = await createCustomerService(customer);
+        const createUser = await createUserService(user);
 
-        if(!createUser) return res.status(400).json({ message: "Customer not created" });
+        if(!createUser) return res.status(400).json({ message: "user not created" });
 
         try {
-          await sendMail(
-            customer.email,
-            "Verify your account",
-            `Hello ${customer.lastName}, your verification code is: ${customer.verificationCode}`,
-
-            `<div>
-            <h2>
-            Hello ${customer.lastName}, your verification code is: <strong>${customer.verificationCode}</strong>
-            </h2>
-            </div>`
-
-          )
+        await sendMail(
+          user.email,
+  "Verify your account", // subject
+  `Hello ${user.lastName}, your verification code is: ${user.verificationCode}`, // message
+  `<div>
+  <h2>Hello ${user.lastName}, your verification code is: <strong>${user.verificationCode}</strong></h2>
+  <h2>Enter this code to verify your account.</h2>
+  </div>` // html
+);
           
         } catch (emailError: any) {
           console.error("Failed to send registration email", emailError)
           
         }
-        return res.status(201).json({ message: "Customer created successfully and verification code sent to email" });
+        return res.status(201).json({ message: "user created successfully and verification code sent to email" });
 
     } catch (error: any) {
         return res.status(500).json({ error: error.message });
@@ -51,32 +48,34 @@ export const createCustomerController = async (req: Request, res: Response) => {
 };
 
 
-export const loginCustomerController = async (req: Request, res: Response) => {
+export const loginUserController = async (req: Request, res: Response) => {
   try {
-    const customer = req.body;
+    const user = req.body;
 
-    // Check if customer exists
-    const customerExist = await customerLoginService(customer);
+    
 
-    if (!customerExist) {
-      return res.status(404).json({ message: "Customer not found" });
+    // Check if user exists
+    const userExist = await userLoginService(user);
+
+    if (!userExist) {
+      return res.status(404).json({ message: "user not found" });
     }
 
     // Compare password using bcrypt
-    const customerMatch = await bcrypt.compareSync(customer.password, customerExist.password);
+    const userMatch = await bcrypt.compareSync(user.password, userExist.password);
 
-    if (!customerMatch) {
+    if (!userMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     // Prepare JWT payload - mostly user information to enbale genereation of JWT token
-    // Note: customerID is unique and used as the subject (sub) in the JWT
+    // Note: userID is unique and used as the subject (sub) in the JWT
     const payload = {
-      sub: customerExist.customerID,
-      customer_id: customerExist.customerID,
-      first_name: customerExist.firstName,
-      last_name: customerExist.lastName,
-      role: customerExist.role, 
+      sub: userExist.customerID,
+      user_id: userExist.customerID,
+      first_name: userExist.firstName,
+      last_name: userExist.lastName,
+      role: userExist.role, 
       exp: Math.floor(Date.now() / 1000) + 60, // Expires in 1 minute
     };
 
@@ -89,18 +88,18 @@ export const loginCustomerController = async (req: Request, res: Response) => {
     }
 
     // Generate JWT token using the payload and secret
-    // The payload contains the customer information and expiration time
+    // The payload contains the user information and expiration time
     const token = jwt.sign(payload, secret);
 
-    // Return token and basic customer info
+    // Return token and basic user info
     return res.status(200).json({
       message: "Login successful",
       token,
-      customer: {
-        customer_id: customerExist.customerID,
-        first_name: customerExist.firstName,
-        last_name: customerExist.lastName,
-        email: customerExist.email
+      user: {
+        user_id: userExist.customerID,
+        first_name: userExist.firstName,
+        last_name: userExist.lastName,
+        email: userExist.email
       },
     });
 
@@ -109,77 +108,57 @@ export const loginCustomerController = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllCustomersController = async (req: Request, res: Response) => {
+
+
+export const verifyUserController = async (req: Request, res: Response) => {
+
+  const { email, code } = req.body;
+
+
   try {
-    const customers = await getCustomerService();
-    return res.status(200).json(customers);
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
-  }
-}
 
-export const getCustomerByIdController = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id); 
-    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
+    const user = await getUserByEmailService(email);
 
-    const customer = await getCustomerByIdService(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    if (!customer) return res.status(404).json({ message: "Customer not found" });
+    if(user.verificationCode === code ) {
+      await verifyUserService(email)
+
+          //send verification email
 
 
-    return res.status(200).json({ data: customer });
+      try {
+      await sendMail(
+        user.email,
+        "Account Verification Successful", 
+        `Hello ${user.lastName}, your account has been successfully verified.`, // message
+        `<div><h2>Hello ${user.lastName}, your account has been successfully verified.</h2>
+        <h2>You can now log in and enjoy our services.</h2>
+        <h2>Thank you for choosing us!</h2>
+        
+        </div>` 
+      )
+      
+    } catch (error: any) {
+      console.error("Failed to send verification email", error);
+      return res.status(500).json({ message: "Failed to send verification email" });
+      
+    }
 
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
-  }
-};
-
-
-export const updateCustomerController = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
-
-    const customerData = req.body;
-
-    const exixtingCustomer = await getCustomerByIdService(id);
-    if (!exixtingCustomer) {
-      return res.status(404).json({ message: "Customer not found" });
+    }else {
+      return res.status(400).json({ message: "Invalid verification code" });
     }
 
 
-    const updatedCustomer = await updateCustomerService(id, customerData);
-     if (!updatedCustomer) {
-            return res.status(400).json({ message: "Customer not updated" });
-        }
-    return res.status(200).json({ message: "Customer updated successfully" });
+    
+      
+    
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
+    
   }
-};
-
-export const deleteCustomerController = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID" });
-
-    const existingCustomer = await getCustomerByIdService(id);
-    if(!existingCustomer){
-      return res.status(404).json({ message: "Customer not found" });
-    }
-
-    const deletedCustomer = await deleteCustomerService(id);
-
-    if(!deletedCustomer){
-      return res.status(400).json({ message: "Customer not deleted" })
-    }
-
-
-    return res.status(200).json({ message: "Customer deleted successfully" });
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
-  }
-}
+ }
 
 

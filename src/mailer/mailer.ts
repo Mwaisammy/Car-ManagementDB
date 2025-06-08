@@ -3,7 +3,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 
-export const sendMail = async ( subject: string, message: string, email: string , html: string) => {
+export const sendMail = async (
+    email: string ,
+     subject: string, 
+     message: string,
+     html: string) => {
     try {
         //Requirement for transporter to send email
         const transporter = nodemailer.createTransport({
@@ -11,7 +15,7 @@ export const sendMail = async ( subject: string, message: string, email: string 
             host: "smtp.gmail.com", // Gmail SMTP host
             port: 465,
             service: 'gmail',  // SMTP port for Gmail
-            secure: true,
+            secure: true,  
             auth: {
                 user: process.env.EMAIL_USER, 
                 pass: process.env.EMAIL_PASSWORD 
