@@ -17,6 +17,9 @@ export const verifyUserService = async(email: string) => {
     await db.update(CustomerTable)
     .set({isVerified: true, verificationCode: null})
     .where(sql`${CustomerTable.email} = ${email}`)
+    .execute();
+    return "User verified successfully"
+
 }
     
 

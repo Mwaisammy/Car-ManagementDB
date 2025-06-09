@@ -40,7 +40,7 @@ export const createUserController = async (req: Request, res: Response) => {
           console.error("Failed to send registration email", emailError)
           
         }
-        return res.status(201).json({ message: "user created successfully and verification code sent to email" });
+        return res.status(201).json({ message: "User created successfully and verification code sent to email" });
 
     } catch (error: any) {
         return res.status(500).json({ error: error.message });
@@ -110,55 +110,71 @@ export const loginUserController = async (req: Request, res: Response) => {
 
 
 
+// --- 3. Verify User Account ---
 export const verifyUserController = async (req: Request, res: Response) => {
+    const { email, verificationCode } = req.body; 
 
-  const { email, code } = req.body;
 
-
-  try {
-
-    const user = await getUserByEmailService(email);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!email || !verificationCode) {
+        return res.status(400).json({ message: "Email and verification code are required to verify your account." });
     }
 
-    if(user.verificationCode === code ) {
-      await verifyUserService(email)
-
-          //send verification email
-
-
-      try {
-      await sendMail(
-        user.email,
-        "Account Verification Successful", 
-        `Hello ${user.lastName}, your account has been successfully verified.`, // message
-        `<div><h2>Hello ${user.lastName}, your account has been successfully verified.</h2>
-        <h2>You can now log in and enjoy our services.</h2>
-        <h2>Thank you for choosing us!</h2>
+    try {
         
-        </div>` 
-      )
-      
+        const user = await getUserByEmailService(email);
+
+        // If no user found with the given email
+        if (!user) {
+            return res.status(404).json({ message: "User not found with the provided email address." });
+        }
+
+        // Check if the account is already verified to prevent redundant operations
+        if (user.isVerified) {
+            return res.status(400).json({ message: "Account is already verified." });
+        }
+
+        
+   
+
+        if (String(user.verificationCode).trim() === String(verificationCode).trim()) {
+           
+            await verifyUserService(email);
+
+            try {
+                await sendMail(
+                    user.email,
+                    "Account Verification Successful - Welcome!",
+                    `Hello ${user.lastName},\n\nYour account has been successfully verified!\n\nYou can now log in and enjoy our services.\n\nThank you for choosing us!`, 
+                    `<div>
+                        <h2>Hello ${user.lastName},</h2>
+                        <p>Your account has been successfully verified!</p>
+                        <p>You can now log in and enjoy our services.</p>
+                        <p>Thank you for choosing us!</p>
+                    </div>` 
+                );
+               
+            } catch (emailError: any) {
+                
+                
+                return res.status(200).json({
+                    message: "Account verified successfully, but there was an issue sending the confirmation email.",
+                    emailError: emailError.message // Optionally include error details
+                });
+            }
+
+            // Respond with success message
+            return res.status(200).json({ message: "Account verified successfully!" });
+
+        } else {
+            
+           
+            return res.status(400).json({ message: "Invalid verification code provided." });
+        }
+
     } catch (error: any) {
-      console.error("Failed to send verification email", error);
-      return res.status(500).json({ message: "Failed to send verification email" });
-      
+        console.error("Error in verifyUserController:", error);
+        return res.status(500).json({ error: error.message || "Internal server error during account verification." });
     }
-
-    }else {
-      return res.status(400).json({ message: "Invalid verification code" });
-    }
-
-
-    
-      
-    
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
-    
-  }
- }
+};
 
 
