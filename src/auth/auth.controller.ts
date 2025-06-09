@@ -70,14 +70,14 @@ export const loginUserController = async (req: Request, res: Response) => {
 
     // Prepare JWT payload - mostly user information to enbale genereation of JWT token
     // Note: userID is unique and used as the subject (sub) in the JWT
-    const payload = {
-      sub: userExist.customerID,
-      user_id: userExist.customerID,
-      first_name: userExist.firstName,
-      last_name: userExist.lastName,
-      role: userExist.role, 
-      exp: Math.floor(Date.now() / 1000) + 60, // Expires in 1 minute
-    };
+   const payload = {
+  sub: userExist.customerID,
+  user_id: userExist.customerID,
+  first_name: userExist.firstName,
+  last_name: userExist.lastName,
+  role: userExist.role,
+  exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // Expires in 24 hours (1 day)
+};
 
     //Generate the token using JWT
 

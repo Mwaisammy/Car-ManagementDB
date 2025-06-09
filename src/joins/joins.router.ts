@@ -10,7 +10,7 @@ import { adminRoleAuth, bothRoleAuth } from "../middleware/bearAuth";
 const joins = (app: Express) => {
   // GET /joins/reservations
   app.route("/joins/reservations").get(
-    // bothRoleAuth,
+    bothRoleAuth,
     async (req, res, next) => {
       try {
         await fetchCustomerReservations(req, res);

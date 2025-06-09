@@ -1,4 +1,3 @@
-import { adminRoleAuth, bothRoleAuth } from "../middleware/bearAuth"
 import { createUserController,loginUserController, verifyUserController } from "./auth.controller"
 import { Express } from "express"
 
@@ -6,7 +5,7 @@ import { Express } from "express"
 
 const authentication = (app: Express) => {
     app.route("/auth/register").post(
-        adminRoleAuth,
+      
 
       
 
@@ -26,7 +25,7 @@ const authentication = (app: Express) => {
 
     app.route("/auth/verify").post(
 
-        bothRoleAuth,
+       
         async(req, res, next) => {
             try {
                 await verifyUserController(req, res)
@@ -43,7 +42,7 @@ const authentication = (app: Express) => {
 
     app.route("/auth/login").post(
 
-        bothRoleAuth,
+      
         async(req, res, next) => {
             try {
                 await loginUserController(req, res)
