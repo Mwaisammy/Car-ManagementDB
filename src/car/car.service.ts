@@ -7,14 +7,18 @@ import { CarTable, TICar } from "../Drizzle/schema"
 //Create a car in the database
 export const createCarService = async (car:TICar) => {
 
-    await db.insert(CarTable).values(car).returning();
-    return "Car added successfully";
+     const [inserted] = await db.insert(CarTable).values(car).returning()
+
+  if(inserted){
+    return inserted
+  }
+  return null
 }
 
 
 //Get all cars in the database
 export const getCarService = async () => {
-    const cars = await db.select().from(CarTable);
+    const cars = await db.query.CarTable.findMany();
     return cars;
 }
 
@@ -31,13 +35,21 @@ export const getCarServiceById = async (id:number) => {
 
 //Update a car by specific id
 
-export const updateCarService = async(id:number, car: TICar) => {
-    await db.update(CarTable).set(car).where(eq(CarTable.carID, id)).returning()
+export const updateCarService = async (carID: number, car: TICar) => {
+    await db.update(CarTable)
+        .set(car)
+        .where(eq(CarTable.carID, carID));
     return "Car updated successfully";
 }
 
-export const deleteCarService = async (id:number) => {
-    const deletedCar = await db.delete(CarTable).where(eq(CarTable.carID, id)).returning()
+//delete car by id
+export const deleteCarService = async (carID: number) => {
+    await db.delete(CarTable).where(eq(CarTable.carID, carID));
+    return "Car deleted successfully";
 
-    return deletedCar[0]
 }
+
+
+
+
+

@@ -6,13 +6,18 @@ import db from "../Drizzle/db";
 
 // Create Location
 export const createLocationService = async (location: TILocation) => {
-  await db.insert(LocationTable).values(location).returning();
-  return  "Location added successfully";
+  const [inserted] = await db.insert(LocationTable).values(location).returning()
+
+  if(inserted){
+    return inserted
+  }
+
+  return null
 };
 
 // Get all Locations
 export const getLocationService = async () => {
-  const locations = await db.select().from(LocationTable);
+  const locations = await db.query.LocationTable.findMany()
   return locations;
 };
 
@@ -26,7 +31,7 @@ export const getLocationByIdService = async (id: number) => {
 
 // Update Location
 export const updateLocationService = async (id: number, location: TILocation) => {
-    await db.update(LocationTable).set(location).where(eq(LocationTable.locationID, id)).returning();
+    await db.update(LocationTable).set(location).where(eq(LocationTable.locationID, id))
     return "Location updated successfully";
 }
 
@@ -35,6 +40,5 @@ export const deleteLocationService = async (id: number) => {
   const deletedLocation = await db
     .delete(LocationTable)
     .where(eq(LocationTable.locationID, id))
-    .returning();
-  return deletedLocation[0];
+  return "Location deleted successfully";
 };

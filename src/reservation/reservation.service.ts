@@ -3,12 +3,18 @@ import db from "../Drizzle/db";
 import { TIReservation, ReservationTable } from "../Drizzle/schema";
 
 export const createReservationService = async (reservation: TIReservation) => {
-  await db.insert(ReservationTable).values(reservation).returning();
-  return "Reservation added successfully";
+  const [inserting] = await db.insert(ReservationTable).values(reservation).returning()
+
+  if(inserting){
+    return "Reservation added successfully"
+
+  }
+  return null
+
 };
 
 export const getReservationService = async () => {
-  const reservations = await db.select().from(ReservationTable);
+  const reservations = await db.query.ReservationTable.findMany();
   return reservations;
 };
 
@@ -27,11 +33,11 @@ export const getReservationsByCustomerIdService = async (customerId: number) => 
 };
 
 export const updateReservationService = async (id: number, reservation: TIReservation) => {
-  await db.update(ReservationTable).set(reservation).where(eq(ReservationTable.reservationID, id)).returning();
+  await db.update(ReservationTable).set(reservation).where(eq(ReservationTable.reservationID, id))
   return "Reservation updated successfully";
 };
 
 export const deleteReservationService = async (id: number) => {
-  const deleted = await db.delete(ReservationTable).where(eq(ReservationTable.reservationID, id)).returning();
-  return deleted[0];
+  const deleted = await db.delete(ReservationTable).where(eq(ReservationTable.reservationID, id))
+  return "Reservation deleted successfully";
 };

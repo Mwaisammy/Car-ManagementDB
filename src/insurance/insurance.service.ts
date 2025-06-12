@@ -4,12 +4,18 @@ import db from "../Drizzle/db";
 
 
 export const createInsuranceService = async (insurance: TIInsurance) => {
-  await db.insert(InsuranceTable).values(insurance).returning();
-  return "Insurance added successfully";
+ const inserted =  await db.insert(InsuranceTable).values(insurance).returning();
+
+ if(inserted){
+   return "Insurance added successfully"
+
+ }
+
+ return null
 };
 
 export const getInsuranceService = async () => {
-  const insurances = await db.select().from(InsuranceTable);
+  const insurances = await db.query.InsuranceTable.findMany();
   return insurances;
 };
 
@@ -21,11 +27,11 @@ export const getInsuranceByIdService = async (id: number) => {
 };
 
 export const updateInsuranceService = async (id: number, insurance: TIInsurance) => {
-  await db.update(InsuranceTable).set(insurance).where(eq(InsuranceTable.insuranceID, id)).returning();
+  await db.update(InsuranceTable).set(insurance).where(eq(InsuranceTable.insuranceID, id))
   return "Insurance updated successfully";
 };
 
 export const deleteInsuranceService = async (id: number) => {
-  const deleted = await db.delete(InsuranceTable).where(eq(InsuranceTable.insuranceID, id)).returning();
-  return deleted[0];
+  const deleted = await db.delete(InsuranceTable).where(eq(InsuranceTable.insuranceID, id))
+  return "Insurance deleted successfully";
 };

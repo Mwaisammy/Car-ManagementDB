@@ -68,8 +68,7 @@ export const loginUserController = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Prepare JWT payload - mostly user information to enbale genereation of JWT token
-    // Note: userID is unique and used as the subject (sub) in the JWT
+   
    const payload = {
   sub: userExist.customerID,
   user_id: userExist.customerID,

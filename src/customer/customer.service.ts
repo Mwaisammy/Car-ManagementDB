@@ -26,12 +26,12 @@ export const getCustomerByEmailService = async (email: string) => {
 
 // update customer by id
 export const updateCustomerService = async (id: number, customer: TICustomer) => {
-    await db.update(CustomerTable).set(customer).where(eq(CustomerTable.customerID, id)).returning();
+    await db.update(CustomerTable).set(customer).where(eq(CustomerTable.customerID, id))
     return "Customer updated successfully";
 }
 
 // delete customer by id
 export const deleteCustomerService = async (id: number) => {
-    await db.delete(CustomerTable).where(eq(CustomerTable.customerID, id)).returning();
+    await db.delete(CustomerTable).where(eq(CustomerTable.customerID, id))
     return "Customer deleted successfully";
 }

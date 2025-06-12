@@ -3,12 +3,17 @@ import db from "../Drizzle/db";
 import { TIPayment, PaymentTable } from "../Drizzle/schema";
 
 export const createPaymentService = async (payment: TIPayment) => {
-  await db.insert(PaymentTable).values(payment).returning();
-  return "Payment added successfully";
+  const [inserted] = await db.insert(PaymentTable).values(payment).returning()
+  if(inserted){
+    return "Payment added successfully"
+
+  }
+
+  return null
 };
 
 export const getPaymentService = async () => {
-  const payments = await db.select().from(PaymentTable);
+  const payments = await db.query.PaymentTable.findMany();
   return payments;
 };
 
@@ -27,11 +32,11 @@ export const getPaymentsByBookingIdService = async (bookingId: number) => {
 };
 
 export const updatePaymentService = async (id: number, payment: TIPayment) => {
-  await db.update(PaymentTable).set(payment).where(eq(PaymentTable.paymentID, id)).returning();
+  await db.update(PaymentTable).set(payment).where(eq(PaymentTable.paymentID, id))
   return "Payment updated successfully";
 };
 
 export const deletePaymentService = async (id: number) => {
-  const deleted = await db.delete(PaymentTable).where(eq(PaymentTable.paymentID, id)).returning();
-  return deleted[0];
+  const deleted = await db.delete(PaymentTable).where(eq(PaymentTable.paymentID, id))
+  return "Payment deleted successfully";
 };
